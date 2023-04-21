@@ -1,4 +1,5 @@
-import { BeforeInsert, BeforeRemove, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { ProductImage } from "./product-image.entity";
 
 @Entity()
 export class Product { // representación de este objeto en la base de datos (una tabla)
@@ -17,7 +18,7 @@ export class Product { // representación de este objeto en la base de datos (un
     price: number;
 
     @Column({
-        type: 'text',
+        type: 'text', // otra manera de definir que la columna es de texto
         nullable: true
     })
     description: string;
@@ -40,28 +41,45 @@ export class Product { // representación de este objeto en la base de datos (un
     @Column('text')
     gender: string;
 
+    @Column('text', {
+        array: true,
+        default: []
+    })
+    tags: string[];
 
-    //tags
-    //images
+    @OneToMany(
+        () => ProductImage,
+        productImage => productImage.product,
+        { cascade: true }
+    )
+    images?: ProductImage
+
+
 
     @BeforeInsert()
     checkSlugInsert() {
-        if ( !this.slug ) {
+        if (!this.slug) {
             this.slug = this.title
         }
 
         this.slug = this.slug
-          .toLowerCase()
-          .replaceAll(' ','_')
-          .replaceAll("'",'')
+            .toLowerCase()
+            .replaceAll(' ', '_')
+            .replaceAll("'", '')
     }
 
     // @BeforeRemove()
     // checkDocumentDelete() {
-        
+
     // }
 
-    // @BeforeUpdate
+    @BeforeUpdate()
+    checkSlugUpdate() {
+        this.slug = this.slug
+            .toLowerCase()
+            .replaceAll(' ', '_')
+            .replaceAll("'", '')
+    }
 
 
 }

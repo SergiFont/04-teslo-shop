@@ -30,5 +30,10 @@ export class CreateProductDto { // el dto hace la conexión entre la request y e
 
     @IsIn(['men', 'women', 'kid', 'unisex'])
     gender: string;
+
+    @IsString({ each: true })
+    @IsArray()
+    @IsOptional()
+    tags: string[];
     
 }
