@@ -7,6 +7,7 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { ProductImage, Product } from './entities';
+import { query } from 'express';
 
 @Injectable()
 export class ProductsService {
@@ -99,16 +100,34 @@ export class ProductsService {
 
     //Create query runner. Ejecuta una serie de querys. Si una de ellas falla, revierte 
     //las anteriores para que no haya impacto en la base de datos.
-    const queryRunner = this.dataSource.createQueryRunner()
+    const queryRunner = this.dataSource.createQueryRunner() // creado fuera del scope TRY para poder usarlo en el catch, y hacer un rollback en caso de que algo salga mal
+    await queryRunner.connect() // establece conexión con la base de datos
+    await queryRunner.startTransaction() // todo lo que añadamos al query runner, se añade a las transacciones
 
     try {
-      await this.productRepository.save(product)
-      return product
+
+      if ( images ) {
+        await queryRunner.manager.delete( ProductImage, { product: { id } } ) // delete 2 parámetros. Parámetro 1: entidad objetivo. Parámetro 2: criterio sobre el que actuar en la DB
+      
+        product.images = images.map( 
+          image => this.productImageRepository.create({ url: image })
+          )
+      } else {
+        // TODO
+      }
+      await queryRunner.manager.save( product )
+
+      // await this.productRepository.save(product)
+      await queryRunner.commitTransaction() // ejecuta en base de datos todas las operaciones descritas anteriormente
+      await queryRunner.release() // libera la conexión del queryRunner
+
+      return this.findOnePlain(id)
       
     } catch (error) {
+      await queryRunner.rollbackTransaction() // en caso de haber error en alguna de las operaciones, hacer rollback para dejar la DB tal y como estaba
+      await queryRunner.release()
       this.handleDbExceptions(error)
     }
-
   }
 
   async remove(id: string) {
@@ -125,5 +144,19 @@ export class ProductsService {
       this.logger.error(error)
       throw new InternalServerErrorException('Unexpected error, check server logs')
   } 
+
+  async deleteAllProducts() {
+    const query = this.productRepository.createQueryBuilder('product')
+
+    try {
+      return await query
+        .delete()
+        .where({})
+        .execute()
+
+    } catch (error) {
+      this.handleDbExceptions(error)
+    }
+  }
 
 }
