@@ -50,9 +50,9 @@ export class Product { // representación de este objeto en la base de datos (un
     @OneToMany(
         () => ProductImage,
         productImage => productImage.product,
-        { cascade: true }
+        { cascade: true, eager: true }
     )
-    images?: ProductImage
+    images?: ProductImage[]
 
 
 

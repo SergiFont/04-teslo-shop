@@ -35,5 +35,10 @@ export class CreateProductDto { // el dto hace la conexión entre la request y e
     @IsArray()
     @IsOptional()
     tags: string[];
+
+    @IsString({ each: true })
+    @IsArray()
+    @IsOptional()
+    images?: string[];
     
 }
