@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { validate as isUUID} from 'uuid'
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -21,6 +21,8 @@ export class ProductsService {
     @InjectRepository(ProductImage) // insercion de la entidad Product
     private readonly productImageRepository: Repository<ProductImage>,
 
+    private readonly dataSource: DataSource,
+
   ){}
 
   async create(createProductDto: CreateProductDto) {
@@ -34,7 +36,7 @@ export class ProductsService {
       }); // crea instancia del producto
       await this.productRepository.save( product ) // graba la instancia en la base de datos
 
-      return {...product, images};
+      return {...product, images}
       
     } catch (error) {
       this.handleDbExceptions(error)
@@ -60,11 +62,11 @@ export class ProductsService {
   }
 
   async findOne(term: string) {
-    let product: Product;
+    let product: Product
 
     if ( isUUID(term) ) product = await this.productRepository.findOneBy({ id: term })
     else {
-      const queryBuilder = this.productRepository.createQueryBuilder('prod');
+      const queryBuilder = this.productRepository.createQueryBuilder('prod')
       product = await queryBuilder
         .where('UPPER(title) =:title or slug =:slug', {
           title: term.toUpperCase(),
@@ -75,7 +77,7 @@ export class ProductsService {
     }  
 
     if ( !product ) throw new NotFoundException(`Product with term "${term}" not found`)
-    return product;
+    return product
 
   }
 
@@ -89,17 +91,19 @@ export class ProductsService {
 
   async update(id: string, updateProductDto: UpdateProductDto) {
 
-    const product = await this.productRepository.preload({
-      id,
-      ...updateProductDto,
-      images: []
-    })
+    const { images, ...toUpdate } = updateProductDto
+
+    const product = await this.productRepository.preload({ id, ...toUpdate })
 
     if ( !product ) throw new NotFoundException(`Product with id: ${id} not found`)
 
+    //Create query runner. Ejecuta una serie de querys. Si una de ellas falla, revierte 
+    //las anteriores para que no haya impacto en la base de datos.
+    const queryRunner = this.dataSource.createQueryRunner()
+
     try {
       await this.productRepository.save(product)
-      return product;
+      return product
       
     } catch (error) {
       this.handleDbExceptions(error)
