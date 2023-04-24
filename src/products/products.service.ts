@@ -8,11 +8,10 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { ProductImage, Product } from './entities';
 import { query } from 'express';
+import { CommonService } from 'src/common/common.service';
 
 @Injectable()
 export class ProductsService {
-
-  private readonly logger = new Logger('ProductsService')
 
   constructor(
 
@@ -23,6 +22,8 @@ export class ProductsService {
     private readonly productImageRepository: Repository<ProductImage>,
 
     private readonly dataSource: DataSource,
+
+    private readonly commonService: CommonService
 
   ){}
 
@@ -40,7 +41,7 @@ export class ProductsService {
       return {...product, images}
       
     } catch (error) {
-      this.handleDbExceptions(error)
+      this.commonService.handleDbExceptions(error)
     }
 
   }
@@ -126,7 +127,7 @@ export class ProductsService {
     } catch (error) {
       await queryRunner.rollbackTransaction() // en caso de haber error en alguna de las operaciones, hacer rollback para dejar la DB tal y como estaba
       await queryRunner.release()
-      this.handleDbExceptions(error)
+      this.commonService.handleDbExceptions(error)
     }
   }
 
@@ -135,15 +136,6 @@ export class ProductsService {
     await this.productRepository.delete(id)
     return 'Product deleted'
   }
-
-
-  private handleDbExceptions ( error: any ) {
-    if ( error.code === '23505' )
-        throw new BadRequestException( error.detail )
-
-      this.logger.error(error)
-      throw new InternalServerErrorException('Unexpected error, check server logs')
-  } 
 
   async deleteAllProducts() {
     const query = this.productRepository.createQueryBuilder('product')
@@ -155,7 +147,7 @@ export class ProductsService {
         .execute()
 
     } catch (error) {
-      this.handleDbExceptions(error)
+      this.commonService.handleDbExceptions(error)
     }
   }
 
