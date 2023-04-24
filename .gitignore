@@ -35,3 +35,13 @@ lerna-debug.log*
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+
+# other
+
+/static/products/*.jpg
+/static/products/*.jpeg
+/static/products/*.gif
+
+/public/products/*.jpg
+/public/products/*.jpeg
+/public/products/*.gif
