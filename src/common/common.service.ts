@@ -23,5 +23,5 @@ export class CommonService {
     
           this.logger.error(error)
           throw new InternalServerErrorException('Unexpected error, check server logs')
-      }
+      } // TODO crear un Modulo para este tipo de manejo de errores
 }
