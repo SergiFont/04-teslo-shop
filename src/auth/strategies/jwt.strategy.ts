@@ -36,7 +36,7 @@ export class JwtStrategy extends PassportStrategy( Strategy ) {
         if ( !user.isActive )
             throw new UnauthorizedException('User is inactive, talk with an admin')
 
-        return user; // porqué no devuelve la password??????? es bueno, pero porqué?
+        return user;
     }
 
 }

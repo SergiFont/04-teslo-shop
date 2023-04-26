@@ -17,4 +17,10 @@ Examples:
 `@Auth(ValidRoles.admin)` : Only the admin role can acces the endpoint. ValidRoles is the inferface where we define them.
 
 
-INTERFACES
+STRATEGY
+
+The strategy is the plan we define to verify our users.
+In this case, we use Json Web Token. 
+Extract the signature from the `.env` and the jwt from the request with the constructor
+Validate the user searching it with the id provided on the JWT. It checks both if the user exists and if it is active.
+
