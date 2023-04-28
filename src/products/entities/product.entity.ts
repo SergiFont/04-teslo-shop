@@ -1,5 +1,6 @@
-import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { BeforeInsert, BeforeUpdate, Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { ProductImage } from "./product-image.entity";
+import { User } from "src/auth/entities/user.entity";
 
 @Entity({ name: 'products' })
 export class Product { // representación de este objeto en la base de datos (una tabla)
@@ -53,6 +54,13 @@ export class Product { // representación de este objeto en la base de datos (un
         { cascade: true, eager: true }
     )
     images?: ProductImage[]
+
+    @ManyToOne(
+        () => User,
+        ( user ) => user.product,
+        { eager: true } // carga la relación como columna al hacer una consulta
+    )
+    user: User
 
 
 
