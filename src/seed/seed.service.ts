@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
+
 import { ProductsService } from 'src/products/products.service';
 import { initialData } from './data/seed-data';
 import { User } from 'src/auth/entities/user.entity';
@@ -20,7 +21,6 @@ export class SeedService {
     await this.deleteTables()
     const adminUser = await this.insertUsers()
     
-
     await this.insertNewProducts( adminUser );
 
     return 'Seed executed'
@@ -52,7 +52,7 @@ export class SeedService {
     return dbUsers[0]
   }
 
-  private async insertNewProducts( user: User ): Promise<Boolean> {
+  private async insertNewProducts( user: User ) {
     await this.productsService.deleteAllProducts()
 
     const products = initialData.products

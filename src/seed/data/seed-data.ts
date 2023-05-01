@@ -1,5 +1,4 @@
-import { User } from "src/auth/entities/user.entity";
-
+import * as bcrypt from 'bcrypt'
 interface SeedProduct {
     description: string;
     images: string[];
@@ -20,7 +19,7 @@ interface SeedUser {
     email: string;
     fullName: string;
     password: string;
-    role: string[];
+    roles: string[];
 }
 
 
@@ -35,14 +34,14 @@ export const initialData: SeedData = {
         {
             email: 'test1@mail.com',
             fullName: 'test1',
-            password: 'Abc123',
-            role: ['admin']
+            password: bcrypt.hashSync('12345Abc', 10),
+            roles: ['admin']
         },
         {
             email: 'test2@mail.com',
             fullName: 'test2',
-            password: 'Abc123',
-            role: ['user', 'super']
+            password: bcrypt.hashSync('12345Abc', 10),
+            roles: ['user', 'super']
         }
     ],
     products: [

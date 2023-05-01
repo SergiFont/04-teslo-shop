@@ -18,13 +18,19 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
-  createUser(@Body() createUserDto: CreateUserDto) {
+  createUser(@Body() createUserDto: CreateUserDto): Promise<Object> {
     return this.authService.create(createUserDto);
   }
 
   @Post('login')
-  loginUser(@Body() loginUserDto: LoginUserDto) {
+  loginUser(@Body() loginUserDto: LoginUserDto): Promise<Object> {
     return this.authService.login( loginUserDto );
+  }
+
+  @Get('check-status')
+  @Auth()
+  checkAuthStatus(@GetUser() user: User): Promise<Object> {
+    return this.authService.checkAuthStatus(user)
   }
 
   @Get('private')

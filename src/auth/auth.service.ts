@@ -67,10 +67,36 @@ export class AuthService {
     
   }
 
+  async checkAuthStatus(user: User) {
+
+    delete user.password
+    delete user.roles
+  
+    return {
+      ...user,
+      token: this.getJwtToken({ id: user.id })
+    }
+
+  }
+
   private getJwtToken( payload: JwtPayload ): string {
 
     const token = this.jwtService.sign( payload )
     return token
 
+  }
+
+  async deleteAllUsers() {
+    const query = this.userRepository.createQueryBuilder('user')
+
+    try {
+      return await query
+        .delete()
+        .where({})
+        .execute()
+
+    } catch (error) {
+      this.commonService.handleDbExceptions(error)
+    }
   }
 }
